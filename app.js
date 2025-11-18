@@ -55,7 +55,12 @@ function init(){
   // Interactions
   btnLoad.addEventListener('click', handleLoad);
   focusSlider.addEventListener('input', e=> setFocus(+e.target.value));
-  dilutionInput.addEventListener('input', e=> sim.state.dilution = Math.max(1, +e.target.value || 1));
+  // Keep dilution in prep step and calc step in sync (two-way)
+  dilutionInput.addEventListener('input', e=>{
+    const v = Math.max(1, +e.target.value || 1);
+    sim.state.dilution = v;
+    dilutionCalcInput.value = String(v);
+  });
 
   squareType.addEventListener('change', e=>{
     sim.state.squareType = e.target.value;
@@ -70,7 +75,11 @@ function init(){
 
   areaInput.addEventListener('input', e=> sim.state.areaPerSquare = Math.max(0.0001, +e.target.value || 0.04));
   depthInput.addEventListener('input', e=> sim.state.depth = Math.max(0.01, +e.target.value || 0.1));
-  dilutionCalcInput.addEventListener('input', e=>{});
+  dilutionCalcInput.addEventListener('input', e=>{
+    const v = Math.max(1, +e.target.value || 1);
+    sim.state.dilution = v;
+    dilutionInput.value = String(v);
+  });
 
   btnCalculate.addEventListener('click', ()=>{
     const N = +countInput.value || 0;
@@ -93,6 +102,8 @@ function init(){
   // Default scene (pre-generate but keep hidden until load)
   setFocus(sim.state.focus);
   setPreset(150);
+  // Initialize calc dilution to match prep dilution input
+  dilutionCalcInput.value = String(dilutionInput.value || sim.state.dilution || 1);
 }
 
 function setPreset(targetCount){
