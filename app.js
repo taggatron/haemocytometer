@@ -27,6 +27,8 @@ function init(){
   sim.blur = sim.svg.querySelector('#blurFilter feGaussianBlur');
   sim.liquid = qs('#liquid');
   sim.squareHighlights = qs('#squareHighlights');
+  // Hide cells until sample is loaded
+  sim.cellsGroup.style.opacity = 0;
 
   // UI elements
   const btnLoad = qs('#btnLoad');
@@ -88,7 +90,7 @@ function init(){
     `;
   });
 
-  // Default scene
+  // Default scene (pre-generate but keep hidden until load)
   setFocus(sim.state.focus);
   setPreset(150);
 }
@@ -192,6 +194,15 @@ function handleLoad(){
       { transform: 'translateY(220px)' }
     ], { duration: 600, easing: 'cubic-bezier(.2,.9,.2,1)', fill: 'forwards' }).onfinish = ()=>{
       sim.liquid.setAttribute('opacity','1');
+      // Ensure cells exist; if not, generate a default density
+      if (!sim.state.cells || sim.state.cells.length === 0) {
+        setPreset(150);
+      }
+      // Fade cells into view
+      sim.cellsGroup.animate([
+        { opacity: 0 },
+        { opacity: 1 }
+      ], { duration: 400, easing: 'ease-out', fill: 'forwards' });
     };
   };
 }

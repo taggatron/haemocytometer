@@ -28,6 +28,7 @@ python3 -m http.server 5173
 - Cells/mL = `cells/µL * 1000`
 
 Defaults:
+
 - RBC: 5 small squares of 0.04 mm² each, depth 0.1 mm
 - WBC: 4 large squares of 1 mm² each, depth 0.1 mm
 
