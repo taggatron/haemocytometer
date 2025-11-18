@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haemocytometer Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7C3AED"/>
+            <stop offset="100%" stop-color="#22D3EE"/>
+          </linearGradient>
+        </defs>
+        <circle cx="24" cy="24" r="22" fill="url(#g1)"/>
+        <g fill="#fff" opacity="0.95">
+          <circle cx="18" cy="18" r="5" />
+          <rect x="24" y="12" width="3" height="24" rx="1.5"/>
+          <circle cx="33" cy="30" r="4" />
+        </g>
+      </svg>
+      <h1>Haemocytometer Simulator</h1>
+    </div>
+    <nav class="header-actions">
+      <button class="btn ghost" id="btnPresetLow">Low Conc</button>
+      <button class="btn ghost" id="btnPresetMed">Med Conc</button>
+      <button class="btn ghost" id="btnPresetHigh">High Conc</button>
+      <button class="btn" id="btnReset">Reset</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="left">
+      <div class="stepper" id="stepper">
+        <div class="step active" data-step="1">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Prepare and Load</h3>
+            <p>Set dilution, then load sample with the pipette.</p>
+            <div class="controls">
+              <label> Dilution factor
+                <input id="dilutionInput" type="number" min="1" step="0.5" value="1" />
+              </label>
+              <button class="btn" id="btnLoad">Load Sample</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Focus</h3>
+            <p>Adjust focus to resolve cells clearly.</p>
+            <div class="controls">
+              <input id="focusSlider" type="range" min="0" max="100" value="60" />
+            </div>
+          </div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Choose Squares</h3>
+            <p>Select which large squares you will count.</p>
+            <div class="controls squares-select" id="squaresSelect">
+              <!-- buttons injected by JS for 4 corners + center -->
+            </div>
+            <small>Tip: Use the top & left inclusion rule.</small>
+          </div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Count Cells</h3>
+            <p>Click cells to toggle counted. Boundary rule is shown.</p>
+            <div class="legend">
+              <span class="chip include">Include: top, left</span>
+              <span class="chip exclude">Exclude: bottom, right</span>
+            </div>
+          </div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>Calculate</h3>
+            <p>Review counts and compute concentration.</p>
+            <div class="calc-grid">
+              <label> Counted cells
+                <input id="countInput" type="number" value="0" />
+              </label>
+              <label> Squares counted
+                <input id="squaresInput" type="number" value="5" />
+              </label>
+              <label> Square type
+                <select id="squareType">
+                  <option value="rbc">RBC (5 small, 0.2mm x 0.2mm inside 1mm)</option>
+                  <option value="wbc">WBC (4 large, 1mm x 1mm)</option>
+                  <option value="custom">Custom (set area)</option>
+                </select>
+              </label>
+              <label class="custom-area hidden"> Area per square (mm²)
+                <input id="areaInput" type="number" step="0.001" value="0.04" />
+              </label>
+              <label> Chamber depth (mm)
+                <input id="depthInput" type="number" step="0.01" value="0.1" />
+              </label>
+              <label> Dilution factor
+                <input id="dilutionCalcInput" type="number" min="1" step="0.5" value="1" />
+              </label>
+              <button class="btn primary" id="btnCalculate">Compute</button>
+            </div>
+            <div class="result" id="result"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="canvas-wrap">
+        <!-- Simulation canvas: chamber + grid + cells + pipette -->
+        <svg id="simSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#F0F9FF"/>
+              <stop offset="100%" stop-color="#ECFEFF"/>
+            </linearGradient>
+            <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#7C3AED" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="blurFilter">
+              <feGaussianBlur stdDeviation="0" edgeMode="duplicate"/>
+            </filter>
+            <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#94A3B8" stroke-width="0.5" />
+            </pattern>
+            <pattern id="boldGridPattern" width="100" height="100" patternUnits="userSpaceOnUse">
+              <rect width="100" height="100" fill="url(#gridPattern)"/>
+              <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#475569" stroke-width="1.5" />
+            </pattern>
+          </defs>
+
+          <!-- Background -->
+          <rect x="0" y="0" width="1200" height="800" fill="url(#bgGrad)"/>
+
+          <!-- Chamber block -->
+          <g id="chamber" transform="translate(250,120)">
+            <rect x="0" y="0" width="700" height="560" rx="24" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+            <rect x="60" y="60" width="580" height="440" fill="url(#boldGridPattern)"/>
+            <!-- liquid fill overlay -->
+            <g id="liquid" opacity="0">
+              <rect x="60" y="60" width="580" height="440" fill="url(#liquidGrad)" fill-opacity="0.12"/>
+              <path id="wave" d="M60,320 C180,300 280,340 350,320 C420,300 520,340 640,320 L640,500 L60,500 Z" fill="#22D3EE" fill-opacity="0.15">
+                <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                  values="M60,320 C180,300 280,340 350,320 C420,300 520,340 640,320 L640,500 L60,500 Z;
+                          M60,330 C180,350 280,310 350,330 C420,350 520,310 640,330 L640,500 L60,500 Z;
+                          M60,320 C180,300 280,340 350,320 C420,300 520,340 640,320 L640,500 L60,500 Z"/>
+              </path>
+            </g>
+
+            <!-- Grid labels for selected squares -->
+            <g id="squareHighlights"></g>
+
+            <!-- Cells container -->
+            <g id="cells" filter="url(#blurFilter)"></g>
+          </g>
+
+          <!-- Pipette & droplet animation -->
+          <g id="pipette" transform="translate(50, -150)">
+            <g>
+              <rect x="0" y="0" width="320" height="40" rx="20" fill="#0EA5E9" />
+              <rect x="260" y="-10" width="22" height="60" rx="6" fill="#7C3AED" />
+              <polygon points="320,20 380,10 380,30" fill="#0EA5E9"/>
+            </g>
+            <circle id="droplet" cx="395" cy="20" r="8" fill="#22D3EE" opacity="0" />
+          </g>
+        </svg>
+      </div>
+      <footer class="tips">
+        <strong>Counting rule:</strong> Include cells touching the top and left borders; exclude bottom and right.
+      </footer>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

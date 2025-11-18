@@ -1,0 +1,76 @@
+:root{
+  --bg:#F8FAFC;
+  --panel:#FFFFFF;
+  --text:#0F172A;
+  --muted:#475569;
+  --line:#E2E8F0;
+  --brand:#7C3AED;
+  --accent:#22D3EE;
+  --success:#10B981;
+  --danger:#EF4444;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--text);
+  background:linear-gradient(120deg,#F0F9FF,#ECFEFF 60%,#F8FAFC);
+}
+.app-header{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px; background:rgba(255,255,255,0.8); backdrop-filter:saturate(120%) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand h1{font-size:20px;margin:0;font-weight:700;letter-spacing:0.2px}
+.brand-icon{width:36px;height:36px}
+.header-actions{display:flex;gap:8px}
+
+.btn{border:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:0 8px 20px rgba(124,58,237,0.25);transition:transform .05s ease, background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:#fff;color:var(--brand);border:1px solid #E9D5FF;box-shadow:none}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--accent))}
+
+.layout{display:grid;grid-template-columns:380px 1fr; gap:20px; padding:20px; max-width:1400px; margin:0 auto}
+.left{display:flex}
+.right{display:flex;flex-direction:column;gap:8px}
+.canvas-wrap{background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(2,6,23,0.06)}
+.tips{color:var(--muted); font-size:14px; padding:0 6px}
+
+.stepper{display:flex;flex-direction:column; gap:10px; width:100%}
+.step{display:flex; gap:12px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px; box-shadow:0 4px 14px rgba(2,6,23,0.05)}
+.step.active{outline:2px solid #DDD6FE}
+.step-number{flex:0 0 auto; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,var(--brand),var(--accent)); color:#fff; font-weight:700}
+.step-content{flex:1}
+.controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.controls input, .controls select{padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:#fff; font:inherit}
+.controls label{display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted)}
+.legend{display:flex; gap:8px; margin-top:6px}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line); color:var(--muted)}
+.chip.include{background:#ECFEFF; border-color:#BAE6FD}
+.chip.exclude{background:#FFF1F2; border-color:#FECACA}
+
+.squares-select{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; width:100%}
+.sq-btn{border:1px dashed #CBD5E1; background:#fff; color:var(--muted); padding:8px; border-radius:8px; cursor:pointer}
+.sq-btn.active{border-style:solid; border-color:#7C3AED; color:#7C3AED; background:#F5F3FF}
+
+.calc-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin:8px 0}
+.custom-area.hidden{display:none}
+.result{margin-top:8px; padding:10px; background:#F8FAFC; border:1px dashed #D1D5DB; border-radius:12px}
+.result strong{color:var(--brand)}
+
+/* SVG overlays */
+#simSvg{width:100%; height:600px; display:block}
+#cells .cell{transition:opacity .15s ease, transform .1s ease}
+#cells .cell.counted{filter:drop-shadow(0 0 0.6px rgba(16,185,129,0.9))}
+.boundary{stroke:#22D3EE; stroke-width:3; stroke-dasharray:6 6; fill:none}
+.boundary.exclude{stroke:#EF4444}
+
+/* Focus blur control uses filter stdDeviation set via JS */
+
+@media (max-width: 1000px){
+  .layout{grid-template-columns:1fr}
+}
